@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import requests
+import os
 
 app = Flask(__name__)
 
@@ -13,13 +14,25 @@ def bybit_proxy():
     print(f"[PROXY] → {url}")
     try:
         r = requests.get(url)
-        return r.json()
+        print("[BYBIT RAW RESPONSE]", r.status_code, r.text[:500])  # limit output
+
+        # Try parsing as JSON, fallback to raw output
+        try:
+            return r.json()
+        except Exception as json_err:
+            return jsonify({
+                "error": "Invalid JSON from Bybit",
+                "status_code": r.status_code,
+                "text": r.text[:500]
+            }), 500
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 @app.route("/")
 def home():
-    return "✅ NEURAL EDGE PROXY is live"
+    return "✅ NEURAL EDGE PROXY IS LIVE"
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=10000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
