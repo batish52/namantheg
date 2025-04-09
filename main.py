@@ -11,27 +11,20 @@ def bybit_proxy():
         return jsonify({"error": "missing query parameters"}), 400
 
     url = f"https://api.bytick.com/v5/market/kline?{q}"
-    print(f"[PROXY] → {url}")
     try:
         r = requests.get(url)
-        print("[BYBIT RAW RESPONSE]", r.status_code, r.text[:500])  # limit output
-
-        # Try parsing as JSON, fallback to raw output
-        try:
-            return r.json()
-        except Exception as json_err:
-            return jsonify({
-                "error": "Invalid JSON from Bybit",
-                "status_code": r.status_code,
-                "text": r.text[:500]
-            }), 500
-
+        r.raise_for_status()
+        return r.json()
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({
+            "error": "Invalid response from Bybit",
+            "details": str(e),
+            "text": r.text if r else "No response"
+        }), 500
 
 @app.route("/")
 def home():
-    return "✅ NEURAL EDGE PROXY IS LIVE"
+    return "✅ NEURAL EDGE PROXY is LIVE via Fly.io"
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
