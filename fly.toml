@@ -1,7 +1,7 @@
 app = "bybit-proxy"
 
 [build]
-  image = "python:3.10"
+  dockerfile = "Dockerfile"
 
 [env]
   FLASK_ENV = "production"
@@ -17,3 +17,4 @@ app = "bybit-proxy"
   [[services.ports]]
     handlers = ["tls", "http"]
     port = 443
+
